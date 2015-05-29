@@ -16,7 +16,7 @@ describe('Cursor', () => {
       });
     });
 
-    describe('get', () => {
+    describe('get subcursor', () => {
       it('returns a subcursor with a reference to the parent cursor', () => {
         let data = { test: true };
         let cursor = new Cursor(data);
@@ -25,7 +25,7 @@ describe('Cursor', () => {
       });
 
       context('when passed a string path', () => {
-        it('returns a cursor to a node in a data structure', () => {
+        it('returns a cursor to a key in an object', () => {
           let data = {
             one: {
               two: {
@@ -38,6 +38,24 @@ describe('Cursor', () => {
           let subCursor = cursor.get('one.two');
           assert.deepEqual(subCursor.deref(), data.one.two);
         });
+
+        it('fails when trying to traverse an array', () => {
+          let data = [1, 2, 3, 4, 5];
+          let cursor = new Cursor(data).get('one.two');
+          assert.throw(cursor.deref, TypeError);
+        });
+
+        it('fails when trying to traverse a string', () => {
+          let data = 'rainbows';
+          let cursor = new Cursor(data).get('one.two');
+          assert.throw(cursor.deref, TypeError);
+        });
+
+        it('fails when trying to traverse a number', () => {
+          let data = 12345;
+          let cursor = new Cursor(data).get('one.two');
+          assert.throw(cursor.deref, TypeError);
+        });
       });
 
       context('when passed an integer path', () => {
@@ -49,6 +67,36 @@ describe('Cursor', () => {
             let key = 3;
             let subCursor = cursor.get(key);
             assert.equal(subCursor.deref(), data[key]);
+          });
+        });
+
+        context('when the structure is an object', () => {
+          it('returns a subcursor to a key in the object', () => {
+            let data = {1: true};
+
+            let cursor = new Cursor(data);
+            let subCursor = cursor.get(1);
+            assert.equal(subCursor.deref(), data[1]);
+          });
+        });
+
+        context('when the structure is a string', () => {
+          it('fails', () => {
+            let data = 'rainbows';
+
+            let cursor = new Cursor(data);
+            let subCursor = cursor.get(1);
+            assert.throw(subCursor.deref, TypeError);
+          });
+        });
+
+        context('when the structure is an integer', () => {
+          it('fails', () => {
+            let data = 12345;
+
+            let cursor = new Cursor(data);
+            let subCursor = cursor.get(1);
+            assert.throw(subCursor.deref, TypeError);
           });
         });
       });

@@ -16,19 +16,18 @@ class Cursor extends EventEmitter {
 
   deref() {
     let node = this.root.data;
+
     if (typeof node === 'function' && typeof node.dump === 'function') {
-      if (this.path) {
-        switch(typeof this.path) {
-          case 'string':
-            let keys = this.path.split('.');
-            keys.forEach((k) => {
-              node = node(k);
-            });
-            break;
-          case 'number':
-            node = node(this.path);
-            break;
-        }
+      switch(typeof this.path) {
+        case 'string':
+          let keys = this.path.split('.');
+          keys.forEach((k) => {
+            node = node(k);
+          });
+          break;
+        case 'number':
+          node = node(this.path);
+          break;
       }
     }
 
