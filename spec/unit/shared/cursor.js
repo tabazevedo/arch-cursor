@@ -139,5 +139,32 @@ describe('Cursor', () => {
         assert.equal(cursor.deref(), data);
       });
     });
+
+    describe('update', () => {
+      it('updates the data with the supplied function', () => {
+        let data = { test: true };
+        let cursor = new Cursor(data);
+        cursor.get('test').update(() => false);
+        assert.equal(cursor.get('test').deref(), false );
+      });
+
+      it('passes the current value to the updater function', () => {
+        let data = { number: 10 };
+        let cursor = new Cursor(data);
+        let val = void 0;
+        cursor.update((it) => {
+          val = it;
+          return it;
+        });
+        assert.deepEqual(val, data);
+      });
+
+      it('supports number paths', () => {
+        let data = [ 1, 2, 3 ];
+        let cursor = new Cursor(data);
+        cursor.get(0).update((it) => it + 1);
+        assert.equal(cursor.get(0).deref(), 2);
+      });
+    });
   });
 });
