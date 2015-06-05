@@ -211,13 +211,22 @@ describe('Cursor', () => {
           cursor.set({ test: false });
         });
 
-        it('passes the new value to change event handlers when an update is triggered', (done) => {
+        it('passes the relevant new value to change event handlers when an update is triggered', (done) => {
           let cursor = new Cursor({ test: true });
           cursor.on('change', (newVal) => {
             assert.equal(newVal.test, false);
             done();
           });
           cursor.set({ test: false });
+        });
+
+        it('passes the new value up the tree', (done) => {
+          let cursor = new Cursor({ a: { b: { c: true }}});
+          cursor.get('a').on('change', (newVal) => {
+            assert.deepEqual(newVal, { b: { c: false } });
+            done();
+          });
+          cursor.get('a.b.c').set(false);
         });
       });
     });
