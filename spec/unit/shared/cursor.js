@@ -168,5 +168,58 @@ describe('Cursor', () => {
         assert.equal(cursor.get('test').deref(), false);
       });
     });
+
+    describe('events', () => {
+      describe('.on', () => {
+        it('adds a listener for an event to the root cursor', (done) => {
+          let cursor = new Cursor({ test: true });
+          let subCursor = cursor.get('test');
+          subCursor.on('done', done);
+          subCursor.emit('done');
+        });
+
+        it('fires a wildcard event at the root when any event is triggered', (done) => {
+          let cursor = new Cursor({ test: true });
+          let subCursor = cursor.get('test');
+          cursor.on('*', done);
+          subCursor.emit('stuff');
+        });
+
+        it('fires the same event for all parent cursors', () => {
+          let cursor = new Cursor({
+            a: {
+              b: {
+                c: true
+              }
+            }
+          });
+          let val = 0;
+          let add = function() { val++; };
+          let a = cursor.get('a');
+          let b = a.get('b');
+          let c = b.get('c');
+          a.on('add', add);
+          b.on('add', add);
+          c.on('add', add);
+          c.emit('add');
+          assert.equal(val, 3);
+        });
+
+        it('fires a change event when an update is triggered', (done) => {
+          let cursor = new Cursor({ test: true });
+          cursor.on('change', function() { done(); });
+          cursor.set({ test: false });
+        });
+
+        it('passes the new value to change event handlers when an update is triggered', (done) => {
+          let cursor = new Cursor({ test: true });
+          cursor.on('change', (newVal) => {
+            assert.equal(newVal.test, false);
+            done();
+          });
+          cursor.set({ test: false });
+        });
+      });
+    });
   });
 });
