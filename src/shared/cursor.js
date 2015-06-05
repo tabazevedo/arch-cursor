@@ -16,7 +16,6 @@ class Cursor extends EventEmitter {
 
   static patchObject(path = '', value) {
     // maps `an.object.path` and a value to { an: { object: { path: value }}}
-    console.log(path);
     let val = {};
     switch (typeof path) {
       case 'string':
@@ -69,6 +68,10 @@ class Cursor extends EventEmitter {
     } else {
       return this;
     }
+  }
+
+  set(value) {
+    this.root.data = this.root.data.patch(Cursor.patchObject(this.path, value));
   }
 }
 

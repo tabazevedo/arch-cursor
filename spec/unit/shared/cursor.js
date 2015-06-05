@@ -158,12 +158,14 @@ describe('Cursor', () => {
         });
         assert.deepEqual(val, data);
       });
+    });
 
-      it('supports number paths', () => {
-        let data = [ 1, 2, 3 ];
+    describe('set', () => {
+      it('replaces the data with the supplied value', () => {
+        let data = { test: true };
         let cursor = new Cursor(data);
-        cursor.get(0).update((it) => it + 1);
-        assert.equal(cursor.get(0).deref(), 2);
+        cursor.get('test').set(false);
+        assert.equal(cursor.get('test').deref(), false);
       });
     });
   });
