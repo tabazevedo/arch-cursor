@@ -103,7 +103,7 @@ class Cursor {
   }
 
   emit(event, ...args) {
-    let events = this
+    this
       .getPathTree()
       .map((path) => {
         return {
@@ -112,7 +112,7 @@ class Cursor {
         };
       })
       .concat([{ eventName: event }, { eventName: '*' } ])
-      .filter((evt) => EventEmitter.listenerCount(this.root.events, evt.eventName) > 0)
+      .filter((evt) => EventEmitter.listenerCount(this.root.events, evt.eventName) > 0) // Don't perform unnecessary derefs and other ops.
       .map((it) => {
         if (event === 'change') {
           it.payload = [this.root.get(it.path).deref()];
@@ -120,11 +120,10 @@ class Cursor {
           it.payload = args;
         }
         return it;
+      })
+      .forEach((evt) => {
+        this.root.events.emit.apply(this.root.events, [evt.eventName, ...evt.payload]);
       });
-
-    events.forEach((evt) => {
-      this.root.events.emit.apply(this.root.events, [evt.eventName, ...evt.payload]);
-    });
   }
 }
 
