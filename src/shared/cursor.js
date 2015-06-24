@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events';
 import oak from 'ancient-oak';
+import { getPatchObject, getPathTree } from './cursor-utils';
 
 class Cursor {
   constructor(data, root, path) {
@@ -12,26 +13,6 @@ class Cursor {
     this.root = root || this;
     this.root.events = this.root.events || new EventEmitter();
     this.path = path;
-  }
-
-  static patchObject(path, value) {
-    // maps `an.object.path` and a value to { an: { object: { path: value }}}
-    let val = {};
-    switch (typeof path) {
-      case 'string':
-        return path
-          .split('.')
-          .reduceRight((prev, cur) => {
-            val = {};
-            val[cur] = prev;
-            return val;
-          }, value);
-      case 'number':
-        val[path] = value;
-        return val;
-      case 'undefined':
-        return value;
-    }
   }
 
   deref() {
@@ -61,7 +42,7 @@ class Cursor {
   update(fn) {
     let val = fn(this.deref());
 
-    this.root.data = this.root.data.patch(Cursor.patchObject(this.path, val));
+    this.root.data = this.root.data.patch(getPatchObject(this.path, val));
     this.emit('change');
   }
 
@@ -73,25 +54,8 @@ class Cursor {
     }
   }
 
-  getPathTree() {
-    let tree = [];
-    switch (typeof this.path) {
-      case 'string':
-        let path = this.path.split('.');
-        while (path.length > 0) {
-          tree.push(path.join('.'));
-          path.pop();
-        }
-        break;
-      case 'number':
-        tree.push(this.path);
-        break;
-    }
-    return tree;
-  }
-
   set(value) {
-    this.root.data = this.root.data.patch(Cursor.patchObject(this.path, value));
+    this.root.data = this.root.data.patch(getPatchObject(this.path, value));
     this.emit('change');
   }
 
@@ -103,8 +67,7 @@ class Cursor {
   }
 
   emit(event, ...args) {
-    this
-      .getPathTree()
+    getPathTree(this.path)
       .map((path) => {
         return {
           path: path,
