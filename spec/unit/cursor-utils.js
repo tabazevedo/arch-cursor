@@ -1,9 +1,9 @@
 /*
-  spec/unit/shared/cursor-utils.js
-  spec for src/shared/cursor-utils.js
+  spec/unit/cursor-utils.js
+  spec for src/cursor-utils.js
 */
 
-import { getPatchObject, getPathTree } from '../../../src/shared/cursor-utils';
+import { getPatchObject, getPathTree } from '../../src/cursor-utils';
 import oak from 'ancient-oak';
 import { assert } from 'chai';
 

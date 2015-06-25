@@ -1,9 +1,9 @@
 /*
-  spec/unit/shared/cursor.js
-  spec for src/shared/cursor.js
+  spec/unit/cursor.js
+  spec for src/cursor.js
 */
 
-import Cursor from '../../../src/shared/cursor';
+import Cursor from '../../src/cursor';
 import { assert } from 'chai';
 
 describe('Cursor', () => {
