@@ -21,7 +21,7 @@ describe('Cursor', () => {
         let data = { test: true };
         let cursor = new Cursor(data);
         let subCursor = cursor.get('test');
-        assert.equal(subCursor.root, cursor);
+        assert.equal(subCursor._root, cursor);
       });
 
       context('when passed a string path', () => {

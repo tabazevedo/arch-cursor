@@ -9,25 +9,25 @@ import { getPatchObject, getPathTree } from './cursor-utils';
 
 class Cursor {
   constructor(data, root, path) {
-    if (data) { this.data = oak(data); }
-    this.root = root || this;
-    this.root.events = this.root.events || new EventEmitter();
-    this.path = path;
+    if (data) { this._data = oak(data); }
+    this._root = root || this;
+    this._root._events = this._root._events || new EventEmitter();
+    this._path = path;
   }
 
   deref() {
-    let node = this.root.data;
+    let node = this._root._data;
 
     if (typeof node === 'function' && typeof node.dump === 'function') {
-      switch(typeof this.path) {
+      switch(typeof this._path) {
         case 'string':
-          let keys = this.path.split('.');
+          let keys = this._path.split('.');
           keys.forEach((k) => {
             node = node(k);
           });
           break;
         case 'number':
-          node = node(this.path);
+          node = node(this._path);
           break;
       }
     }
@@ -42,32 +42,32 @@ class Cursor {
   update(fn) {
     let val = fn(this.deref());
 
-    this.root.data = this.root.data.patch(getPatchObject(this.path, val));
+    this._root._data = this._root._data.patch(getPatchObject(this._path, val));
     this.emit('change');
   }
 
   get(path) {
     if (typeof path !== 'undefined') {
-      return new Cursor(null, this.root, (this.path ? `${this.path}.${path}` : path));
+      return new Cursor(null, this._root, (this._path ? `${this._path}.${path}` : path));
     } else {
       return this;
     }
   }
 
   set(value) {
-    this.root.data = this.root.data.patch(getPatchObject(this.path, value));
+    this._root._data = this._root._data.patch(getPatchObject(this._path, value));
     this.emit('change');
   }
 
   on(event, action) {
     let eventName = event;
-    if (typeof this.path !== 'undefined') { eventName = `${this.path}:${event}`; }
+    if (typeof this._path !== 'undefined') { eventName = `${this._path}:${event}`; }
 
-    this.root.events.on(eventName, action);
+    this._root._events.on(eventName, action);
   }
 
   emit(event, ...args) {
-    getPathTree(this.path)
+    getPathTree(this._path)
       .map((path) => {
         return {
           path: path,
@@ -75,17 +75,17 @@ class Cursor {
         };
       })
       .concat([{ eventName: event }, { eventName: '*' } ])
-      .filter((evt) => EventEmitter.listenerCount(this.root.events, evt.eventName) > 0) // Don't perform unnecessary derefs and other ops.
+      .filter((evt) => EventEmitter.listenerCount(this._root._events, evt.eventName) > 0) // Don't perform unnecessary derefs and other ops.
       .map((it) => {
         if (event === 'change') {
-          it.payload = [this.root.get(it.path).deref()];
+          it.payload = [this._root.get(it.path).deref()];
         } else {
           it.payload = args;
         }
         return it;
       })
       .forEach((evt) => {
-        this.root.events.emit.apply(this.root.events, [evt.eventName, ...evt.payload]);
+        this._root._events.emit.apply(this._root._events, [evt.eventName, ...evt.payload]);
       });
   }
 }

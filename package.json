@@ -37,6 +37,7 @@
     "gulp-util": "^3.0.4"
   },
   "dependencies": {
-    "ancient-oak": "^0.3.4"
+    "ancient-oak": "^0.3.4",
+    "raf": "^3.0.0"
   }
 }
